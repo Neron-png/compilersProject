@@ -30,44 +30,77 @@ def t_COMMENT(t):
     return t
 
 
+words = {
+    'program': 'PROGRAM',
+    'const': 'CONST',
+    'type': 'TYPE',
+    'array': 'ARRAY',
+    'set': 'SET',
+    'of': 'OF',
+    'record': 'RECORD',
+    'var': 'VAR',
+    'forward': 'FORWARD',
+    'function': 'FUNCTION',
+    'procedure': 'PROCEDURE',
+    'integer': 'INTEGER',
+    'real': 'REAL',
+    'boolean': 'BOOLEAN',
+    'char': 'CHAR',
+    'begin': 'BEGIN',
+    'end': 'END',
+    'if': 'IF',
+    'then': 'THEN',
+    'else': 'ELSE',
+    'do': 'DO',
+    'while': 'WHILE',
+    'for': 'FOR',
+    'downto': 'DOWNTO',
+    'to': 'TO',
+    'with': 'WITH',
+    'read': 'READ',
+    'write': 'WRITE',
+    'or': 'OROP',
+    'not': 'NOTOP',
+    'in': 'INOP',
+}
+
 # Words
-t_PROGRAM = r'program'
-t_CONST = r'const'
-t_TYPE = r'type'
-t_ARRAY = r'array'
-t_SET = r'set'
-t_OF = r'of'
-t_RECORD = r'record'
-t_VAR = r'var'
-t_FORWARD = r'forward'
-t_FUNCTION = r'function'
-t_PROCEDURE = r'procedure'
-t_INTEGER = r'integer'
-t_REAL = r'real'
-t_BOOLEAN = r'boolean'
-t_CHAR = r'char'
-t_BEGIN = r'begin'
-t_END = r'end'
-t_IF = r'if'
-t_THEN = r'then'
-t_ELSE = r'else'
-t_DO = r'do'
-t_WHILE = r'while'
-t_FOR = r'for'
-t_DOWNTO = r'downto'
-t_TO = r'to'
-t_WITH = r'with'
-t_READ = r'read'
-t_WRITE = r'write'
-t_OROP = r'or'
-t_NOTOP = r'not'
-t_INOP = r'in'
-
-
-t_NAME = r'_?[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?'
+words_ = {
+    'PROGRAM': 'program',
+    'CONST': 'const',
+    'TYPE': 'type',
+    'ARRAY': 'array',
+    'SET': 'set',
+    'OF': 'of',
+    'RECORD': 'record',
+    'VAR': 'var',
+    'FORWARD': 'forward',
+    'FUNCTION': 'function',
+    'PROCEDURE': 'procedure',
+    'INTEGER': 'integer',
+    'REAL': 'real',
+    'BOOLEAN': 'boolean',
+    'CHAR': 'char',
+    'BEGIN': 'begin',
+    'END': 'end',
+    'IF': 'if',
+    'THEN': 'then',
+    'ELSE': 'else',
+    'DO': 'do',
+    'WHILE': 'while',
+    'FOR': 'for',
+    'DOWNTO': 'downto',
+    'TO': 'to',
+    'WITH': 'with',
+    'READ': 'read',
+    'WRITE': 'write',
+    'OROP': 'or',
+    'NOTOP': 'not',
+    'INOP': 'in'
+}
 
 # OPERATOS
-t_MULDIVANDOP = r'(\*)|/|(DIV)|(MOD)|(AND)'
+t_MULDIVANDOP = r'(\*)|/|(div)|(mod)|(and)'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_SEMI = r';'
@@ -79,6 +112,16 @@ t_EQU = r'='
 t_LBRACK = r'\['
 t_RBRACK = r'\]'
 t_EOF = r'<EOF>'
+
+
+def t_NAME(t):
+    r'_?[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?'
+    t.type = words.get(t.value, "NAME")
+    if t.value in ("mod", "div", "and"):
+        t.type = "MULDIVANDOP"
+
+    return t
+
 
 
 def t_ADDOP(t):
@@ -94,9 +137,6 @@ def t_BCONST(t):
     r'(TRUE)|(FALSE)'
     t.value = t.value == "TRUE"
     return t
-
-
-
 
 
 def t_ICONST_bin(t):
