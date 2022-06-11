@@ -6,7 +6,7 @@ tokens = ('PROGRAM', 'CONST', 'TYPE', 'ARRAY', 'SET', 'OF', 'RECORD', 'VAR', 'FO
           'DOWNTO', 'TO', 'WITH', 'READ', 'WRITE', 'OROP', 'NOTOP', 'INOP', 'ICONST', 'RCONST', 'BCONST', 'CCONST',
           'RELOP', 'ADDOP', 'MULDIVANDOP', 'LPAREN', 'RPAREN', 'SEMI', 'DOT', 'COMMA', 'COLON', 'ASSIGN', 'EQU',
           'LBRACK',
-          'RBRACK', 'EOF', 'COMMENT', 'NAME', 'STRING',)
+          'RBRACK', 'EOF', 'COMMENT', 'ID', 'STRING', 'DOTDOT')
 
 # Ignored characters
 t_ignore = ' \t'
@@ -29,7 +29,7 @@ def t_COMMENT(t):
     t.lexer.lineno += t.value.count("\n")
     return t
 
-
+# Reserved words
 words = {
     'program': 'PROGRAM',
     'const': 'CONST',
@@ -64,46 +64,13 @@ words = {
     'in': 'INOP',
 }
 
-# Words
-words_ = {
-    'PROGRAM': 'program',
-    'CONST': 'const',
-    'TYPE': 'type',
-    'ARRAY': 'array',
-    'SET': 'set',
-    'OF': 'of',
-    'RECORD': 'record',
-    'VAR': 'var',
-    'FORWARD': 'forward',
-    'FUNCTION': 'function',
-    'PROCEDURE': 'procedure',
-    'INTEGER': 'integer',
-    'REAL': 'real',
-    'BOOLEAN': 'boolean',
-    'CHAR': 'char',
-    'BEGIN': 'begin',
-    'END': 'end',
-    'IF': 'if',
-    'THEN': 'then',
-    'ELSE': 'else',
-    'DO': 'do',
-    'WHILE': 'while',
-    'FOR': 'for',
-    'DOWNTO': 'downto',
-    'TO': 'to',
-    'WITH': 'with',
-    'READ': 'read',
-    'WRITE': 'write',
-    'OROP': 'or',
-    'NOTOP': 'not',
-    'INOP': 'in'
-}
 
 # OPERATOS
 t_MULDIVANDOP = r'(\*)|/|(div)|(mod)|(and)'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_SEMI = r';'
+t_DOTDOT = r'\.\.'
 t_DOT = r'\.'
 t_COMMA = r','
 t_ASSIGN = r':='
@@ -116,7 +83,7 @@ t_EOF = r'<EOF>'
 
 def t_NAME(t):
     r'_?[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?'
-    t.type = words.get(t.value, "NAME")
+    t.type = words.get(t.value, "ID")
     if t.value in ("mod", "div", "and"):
         t.type = "MULDIVANDOP"
 
@@ -214,11 +181,12 @@ def t_error(t):
     # t.lexer.skip(1)
 
 
-lexer = lex()
-with open("SimplePascaltest1.p", "r+") as f:
-    lexer.input(f.read())
-    while True:
-        tok = lexer.token()
-        if not tok:
-            break  # No more input
-        print(tok)
+if __name__ == "__main__":
+    lexer = lex()
+    with open("SimplePascaltest1.p", "r+") as f:
+        lexer.input(f.read())
+        while True:
+            tok = lexer.token()
+            if not tok:
+                break  # No more input
+            print(tok)
