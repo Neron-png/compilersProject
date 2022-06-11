@@ -180,9 +180,9 @@ def t_error(t):
     print(lexer.lineno)
     # t.lexer.skip(1)
 
+lexer = lex()
 
 if __name__ == "__main__":
-    lexer = lex()
     with open("SimplePascaltest1.p", "r+") as f:
         lexer.input(f.read())
         while True:

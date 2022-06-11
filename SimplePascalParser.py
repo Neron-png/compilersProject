@@ -1,3 +1,5 @@
+import logging
+
 import ply.yacc as yacc
 import SimplePascalLexer
 from SimplePascalLexer import tokens
@@ -11,7 +13,7 @@ def p_empty(p):
 
 def p_program(p):
     """
-    program : header declarations subprograms comp statement DOT
+    program : header declarations subprograms comp_statement DOT
     """
     pass
 
@@ -126,13 +128,13 @@ def p_typedefs (p):
 
 def p_type_defs (p):
     """
-    type_defs    : type_defs SEMI ID EQU type def
+    type_defs    : type_defs SEMI ID EQU type_def
                 | ID EQU type_def
     """
     pass
 
 
-def type_def (p):
+def p_type_def (p):
     """
     type_def    : ARRAY LBRACK dims RBRACK OF typename
                 | SET OF typename
@@ -143,7 +145,7 @@ def type_def (p):
     pass
 
 
-def dims (p):
+def p_dims (p):
     """
     dims        : dims COMMA limits
                 | limits
@@ -151,7 +153,7 @@ def dims (p):
     pass
 
 
-def limits (p):
+def p_limits (p):
     """
     limits      : limit DOTDOT limit
                 | ID
@@ -159,7 +161,7 @@ def limits (p):
     pass
 
 
-def limit (p):
+def p_limit (p):
     """
     limit       : ADDOP ICONST
                 | ADDOP ID
@@ -171,7 +173,7 @@ def limit (p):
     pass
 
 
-def typename (p):
+def p_typename (p):
     """
     typename        : standard_type
                     | ID
@@ -179,7 +181,7 @@ def typename (p):
     pass
 
 
-def standard_type (p):
+def p_standard_type (p):
     """
     standard_type   : INTEGER
                     | REAL
@@ -189,7 +191,7 @@ def standard_type (p):
     pass
 
 
-def fields (p):
+def p_fields (p):
     """
     fields   : fields SEMI field
              | field
@@ -197,14 +199,14 @@ def fields (p):
     pass
 
 
-def field (p):
+def p_field (p):
     """
     field   : identifiers COLON typename
     """
     pass
 
 
-def identifiers (p):
+def p_identifiers (p):
     """
     identifiers     : identifiers COMMA ID
                     | ID
@@ -212,7 +214,7 @@ def identifiers (p):
     pass
 
 
-def vardefs (p):
+def p_vardefs (p):
     """
     vardefs     : VAR variable_defs SEMI
                     | empty
@@ -220,15 +222,15 @@ def vardefs (p):
     pass
 
 
-def variable_defs (p):
+def p_variable_defs (p):
     """
-    variable_defs     : variable_defsSEMI identifiers COLON typename
+    variable_defs     : variable_defs SEMI identifiers COLON typename
                     | identifiers COLON typename
     """
     pass
 
 
-def subprograms (p):
+def p_subprograms (p):
     """
     subprograms     : subprograms subprogram SEMI
                     | empty
@@ -236,7 +238,7 @@ def subprograms (p):
     pass
 
 
-def subprogram (p):
+def p_subprogram (p):
     """
     subprogram     : sub_header SEMI FORWARD
                 | sub_header SEMI declarations subprograms comp_statement
@@ -244,7 +246,7 @@ def subprogram (p):
     pass
 
 
-def sub_header (p):
+def p_sub_header (p):
     """
     sub_header  : FUNCTION ID formal_parameters COLON standard_type
                 | PROCEDURE ID formal_parameters
@@ -253,15 +255,15 @@ def sub_header (p):
     pass
 
 
-def formal_parameters (p):
+def p_formal_parameters (p):
     """
-    formal_parameters  : LPAREN parameter list RPAREN
+    formal_parameters  : LPAREN parameter_list RPAREN
                 | empty
     """
     pass
 
 
-def parameter_list (p):
+def p_parameter_list (p):
     """
     parameter_list  : parameter_list SEMI pass_p identifiers COLON typename
                 | pass_p identifiers COLON typename
@@ -269,7 +271,7 @@ def parameter_list (p):
     pass
 
 
-def pass_p (p):
+def p_pass_p (p):
     """
     pass_p      : VAR
                 | empty
@@ -277,14 +279,14 @@ def pass_p (p):
     pass
 
 
-def comp_statement (p):
+def p_comp_statement (p):
     """
     comp_statement      : BEGIN statements END
     """
     pass
 
 
-def statements (p):
+def p_statements (p):
     """
     statements      : statements SEMI statement
                     | statement
@@ -292,7 +294,7 @@ def statements (p):
     pass
 
 
-def statement (p):
+def p_statement (p):
     """
     statement       : assignment
                     | if_statement
@@ -307,7 +309,7 @@ def statement (p):
     pass
 
 
-def assignment (p):
+def p_assignment (p):
     """
     assignment      : variable ASSIGN expression
                     | variable ASSIGN STRING
@@ -315,14 +317,14 @@ def assignment (p):
     pass
 
 
-def if_statement (p):
+def p_if_statement (p):
     """
     if_statement      : IF expression THEN statement if_tail
     """
     pass
 
 
-def if_tail (p):
+def p_if_tail (p):
     """
     if_tail         : ELSE statement
                     | empty
@@ -330,21 +332,21 @@ def if_tail (p):
     pass
 
 
-def while_statement (p):
+def p_while_statement (p):
     """
     while_statement         : WHILE expression DO statement
     """
     pass
 
 
-def for_statement (p):
+def p_for_statement (p):
     """
     for_statement         : FOR ID ASSIGN iter_space DO statement
     """
     pass
 
 
-def iter_space (p):
+def p_iter_space (p):
     """
     iter_space          : expression TO expression
                         | expression DOWNTO expression
@@ -352,14 +354,14 @@ def iter_space (p):
     pass
 
 
-def with_statement (p):
+def p_with_statement (p):
     """
     with_statement      : WITH variable DO statement
     """
     pass
 
 
-def subprogram_call (p):
+def p_subprogram_call (p):
     """
     subprogram_call     : ID
                         | ID LPAREN expressions RPAREN
@@ -367,15 +369,15 @@ def subprogram_call (p):
     pass
 
 
-def io_statement (p):
+def p_io_statement (p):
     """
-    io_statement        : READ LPAREN read list RPAREN
+    io_statement        : READ LPAREN read_list RPAREN
                         | WRITE LPAREN write_list RPAREN
     """
     pass
 
 
-def read_list (p):
+def p_read_list (p):
     """
     read_list           : read_list COMMA read_item
                         | read_item
@@ -383,14 +385,14 @@ def read_list (p):
     pass
 
 
-def read_item (p):
+def p_read_item (p):
     """
     read_item           : variable
     """
     pass
 
 
-def write_list (p):
+def p_write_list (p):
     """
     write_list          : write_list COMMA write_item
                         | write_item
@@ -398,7 +400,7 @@ def write_list (p):
     pass
 
 
-def write_item (p):
+def p_write_item (p):
     """
     write_item          : expression
                         | STRING
@@ -423,20 +425,19 @@ def signal_error(string, lineno):
 def from_file(filename):
     try:
         with open(filename, "rU") as f:
-            init()
-            parser.parse(f.read(), lexer=lex.lex(module=decaflexer), debug=None)
-        return not decaflexer.errorflag
+            parser.parse(f.read(), lexer=lex.lex(module=SimplePascalLexer), debug=None)
+        return not error_f
     except IOError as e:
-        print "I/O error: %s: %s" % (filename, e.strerror)
+        print("I/O error: %s: %s" % (filename, e.strerror))
 
 
 if __name__ == "__main__" :
-    f = open(sys.argv[1], "r")
+    f = open("SimplePascaltest1.p", "r")
     logging.basicConfig(
             level=logging.CRITICAL,
     )
     log = logging.getLogger()
-    res = parser.parse(f.read(), lexer=lex.lex(module=decaflexer), debug=log)
+    res = parser.parse(f.read(), lexer=SimplePascalLexer.lexer, debug=log)
 
     if parser.errorok :
         print("Parsing succeeded")
