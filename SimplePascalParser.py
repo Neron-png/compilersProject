@@ -3,6 +3,7 @@ import SimplePascalLexer
 from SimplePascalLexer import tokens
 from SimplePascalLexer import lex
 
+error_f = False
 
 def p_empty(p):
     'empty :'
@@ -404,4 +405,40 @@ def write_item (p):
     """
     pass
 
+#########################################################################
 
+def p_error(p):
+    if p is None:
+        signal_error("Unexpected end-of-file", 'end')
+    else:
+        signal_error("Unexpected token '{0}'".format(p.value), p.lineno)
+
+parser = yacc.yacc()
+
+def signal_error(string, lineno):
+    print("{1}: {0}".format(string, lineno))
+    error_f = True
+
+
+def from_file(filename):
+    try:
+        with open(filename, "rU") as f:
+            init()
+            parser.parse(f.read(), lexer=lex.lex(module=decaflexer), debug=None)
+        return not decaflexer.errorflag
+    except IOError as e:
+        print "I/O error: %s: %s" % (filename, e.strerror)
+
+
+if __name__ == "__main__" :
+    f = open(sys.argv[1], "r")
+    logging.basicConfig(
+            level=logging.CRITICAL,
+    )
+    log = logging.getLogger()
+    res = parser.parse(f.read(), lexer=lex.lex(module=decaflexer), debug=log)
+
+    if parser.errorok :
+        print("Parsing succeeded")
+    else:
+        print("Parsing failed")
