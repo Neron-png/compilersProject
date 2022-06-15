@@ -12,11 +12,11 @@ start = 'program'
 precedence = (
     ('right', 'ASSIGN'),
     ('left', 'OROP'),
-    ('nonassoc', 'EQU'),
+    ('nonassoc', 'EQU', 'RELOP'),
+    # ('nonassoc', 'RELOP'),
     ('left', 'ADDOP'),
     ('left', 'MULDIVANDOP'),
     ('right', 'NOTOP'),
-    ('nonassoc', 'RELOP'),
     ('right', 'ELSE'),
     ('right', 'RPAREN'),
 )
