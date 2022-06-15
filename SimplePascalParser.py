@@ -7,6 +7,22 @@ from SimplePascalLexer import lex
 
 error_f = False
 
+start = 'program'
+
+precedence = (
+    ('right', 'ASSIGN'),
+    ('left', 'OROP'),
+    ('nonassoc', 'EQU'),
+    ('left', 'ADDOP'),
+    ('left', 'MULDIVANDOP'),
+    ('right', 'NOTOP'),
+    ('nonassoc', 'RELOP'),
+    ('right', 'ELSE'),
+    ('right', 'RPAREN'),
+)
+
+
+
 def p_empty(p):
     'empty :'
     pass

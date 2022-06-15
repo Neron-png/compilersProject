@@ -1,3 +1,5 @@
+import re
+
 from ply.lex import lex
 
 # All tokens must be named in advance.
@@ -5,11 +7,10 @@ tokens = ('PROGRAM', 'CONST', 'TYPE', 'ARRAY', 'SET', 'OF', 'RECORD', 'VAR', 'FO
           'INTEGER', 'REAL', 'BOOLEAN', 'CHAR', 'BEGIN', 'END', 'IF', 'THEN', 'ELSE', 'WHILE', 'DO', 'FOR',
           'DOWNTO', 'TO', 'WITH', 'READ', 'WRITE', 'OROP', 'NOTOP', 'INOP', 'ICONST', 'RCONST', 'BCONST', 'CCONST',
           'RELOP', 'ADDOP', 'MULDIVANDOP', 'LPAREN', 'RPAREN', 'SEMI', 'DOT', 'COMMA', 'COLON', 'ASSIGN', 'EQU',
-          'LBRACK',
-          'RBRACK', 'EOF', 'COMMENT', 'ID', 'STRING', 'DOTDOT')
+          'LBRACK', 'RBRACK', 'EOF', 'COMMENT', 'ID', 'STRING', 'DOTDOT')
 
 # Ignored characters
-t_ignore = ' \t'
+t_ignore = ' |\t'
 
 
 def t_newline(t):
@@ -27,7 +28,7 @@ def t_STRING(t):
 def t_COMMENT(t):
     r'{([^}]|\n)*}'
     t.lexer.lineno += t.value.count("\n")
-    return t
+    pass
 
 # Reserved words
 words = {
@@ -66,6 +67,8 @@ words = {
 
 
 # OPERATOS
+t_LBRACK = r'\['
+t_RBRACK = r'\]'
 t_MULDIVANDOP = r'(\*)|/|(div)|(mod)|(and)'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
@@ -76,8 +79,6 @@ t_COMMA = r','
 t_ASSIGN = r':='
 t_COLON = r':'
 t_EQU = r'='
-t_LBRACK = r'\['
-t_RBRACK = r'\]'
 t_EOF = r'<EOF>'
 
 
@@ -153,8 +154,8 @@ def t_RCONST_hex(t):
 
 
 def t_RCONST_exp(t):
-    r'([1-9][0-9]*)E-?([1-9][0-9]*)'
-    a = int(t.value.split("E")[0])
+    r'\.?([1-9][0-9]*)E-?([1-9][0-9]*)'
+    a = float("0" + t.value.split("E")[0])
     b = int(t.value.split("E")[1])
     t.value = a * 10 ** b
     t.type = "RCONST"
@@ -169,7 +170,7 @@ def t_RCONST_reg(t):
 
 
 def t_CCONST(t):
-    r"'.|(\\[bvrntf])'"
+    r"'(.|(\\[bvrntf]))'"
     t.value = t.value[1:-1]
     return t
 
@@ -187,6 +188,8 @@ if __name__ == "__main__":
         lexer.input(f.read())
         while True:
             tok = lexer.token()
+            # if lexer.lineno == 4:
+            #     print(lexer.lexretext)
             if not tok:
                 break  # No more input
             print(tok)
