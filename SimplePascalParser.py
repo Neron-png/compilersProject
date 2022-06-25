@@ -16,7 +16,7 @@ precedence = (
     ('nonassoc', 'EQU', 'RELOP', 'INOP'),
     ('left', 'DOT', 'LBRACK', 'RBRACK', 'LPAREN', 'RPAREN'),
     ('right', 'NOTOP'),
-    ('right', 'ELSE'),
+    # ('right', 'ELSE'),
 )
 
 
@@ -310,17 +310,23 @@ def p_statements (p):
 
 def p_statement (p):
     """
-    statement       : assignment
-                    | if_statement
-                    | while_statement
-                    | for_statement
-                    | with_statement
-                    | subprogram_call
-                    | io_statement
-                    | comp_statement
-                    | empty
+    statement       : s_statement
+                    | if_a_statement
     """
     pass
+
+def p_s_statement (p):
+    """
+    s_statement : assignment
+            | if_s_statement
+            | while_statement
+            | for_statement
+            | with_statement
+            | subprogram_call
+            | io_statement
+            | comp_statement
+            | empty
+    """
 
 def p_assignment (p):
     """
@@ -330,17 +336,17 @@ def p_assignment (p):
     pass
 
 
-def p_if_statement (p):
+def p_if_s_statement (p):
     """
-    if_statement      : IF expression THEN statement if_tail
+    if_s_statement      : IF expression THEN s_statement ELSE s_statement
     """
     pass
 
 
-def p_if_tail (p):
+def p_if_a_statement (p):
     """
-    if_tail         : ELSE statement
-                    | empty
+    if_a_statement      : IF expression THEN statement
+                        | IF expression THEN s_statement ELSE if_a_statement
     """
     pass
 
