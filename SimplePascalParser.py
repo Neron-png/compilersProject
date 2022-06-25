@@ -10,13 +10,11 @@ error_f = False
 start = 'program'
 
 precedence = (
-    # ('left', 'ASSIGN'),
+    ('nonassoc', 'EQU', 'RELOP', 'INOP'),
     ('left', 'ADDOP', 'OROP'),
     ('left', 'MULDIVANDOP'),
-    ('nonassoc', 'EQU', 'RELOP', 'INOP'),
-    ('left', 'DOT', 'LBRACK', 'RBRACK', 'LPAREN', 'RPAREN'),
     ('right', 'NOTOP'),
-    # ('right', 'ELSE'),
+    ('left', 'DOT', 'LBRACK', 'RBRACK', 'LPAREN', 'RPAREN')
 )
 
 
@@ -310,15 +308,29 @@ def p_statements (p):
 
 def p_statement (p):
     """
-    statement       : s_statement
-                    | if_a_statement
+    statement       : open_statement
+                    | closed_statement
     """
     pass
 
-def p_s_statement (p):
+def p_open_statement (p):
     """
-    s_statement : assignment
-            | if_s_statement
+    open_statement  : IF expression THEN non_if_statement
+                    | IF expression THEN open_statement
+                    | IF expression THEN closed_statement ELSE open_statement
+    """
+
+
+def p_closed_statement (p):
+    """
+    closed_statement  : non_if_statement
+                    | IF expression THEN closed_statement ELSE closed_statement
+    """
+
+
+def p_non_if_statement (p):
+    """
+    non_if_statement : assignment
             | while_statement
             | for_statement
             | with_statement
@@ -332,21 +344,6 @@ def p_assignment (p):
     """
     assignment      : variable ASSIGN expression
                     | variable ASSIGN STRING
-    """
-    pass
-
-
-def p_if_s_statement (p):
-    """
-    if_s_statement      : IF expression THEN s_statement ELSE s_statement
-    """
-    pass
-
-
-def p_if_a_statement (p):
-    """
-    if_a_statement      : IF expression THEN statement
-                        | IF expression THEN s_statement ELSE if_a_statement
     """
     pass
 
