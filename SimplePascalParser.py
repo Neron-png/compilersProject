@@ -10,15 +10,13 @@ error_f = False
 start = 'program'
 
 precedence = (
-    ('right', 'ASSIGN'),
-    ('left', 'OROP'),
-    ('nonassoc', 'EQU', 'RELOP'),
-    # ('nonassoc', 'RELOP'),
-    ('left', 'ADDOP'),
+    # ('left', 'ASSIGN'),
+    ('left', 'ADDOP', 'OROP'),
     ('left', 'MULDIVANDOP'),
+    ('nonassoc', 'EQU', 'RELOP', 'INOP'),
+    ('left', 'DOT', 'LBRACK', 'RBRACK', 'LPAREN', 'RPAREN'),
     ('right', 'NOTOP'),
     ('right', 'ELSE'),
-    ('right', 'RPAREN'),
 )
 
 
@@ -323,7 +321,6 @@ def p_statement (p):
                     | empty
     """
     pass
-
 
 def p_assignment (p):
     """
