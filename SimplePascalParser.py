@@ -14,7 +14,9 @@ precedence = (
     ('left', 'ADDOP', 'OROP'),
     ('left', 'MULDIVANDOP'),
     ('right', 'NOTOP'),
-    ('left', 'DOT', 'LBRACK', 'RBRACK', 'LPAREN', 'RPAREN')
+    ('right', 'ELSE'),
+    ('left', 'DOT', 'LBRACK', 'RBRACK', 'LPAREN', 'RPAREN'),
+
 )
 
 
@@ -308,42 +310,38 @@ def p_statements (p):
 
 def p_statement (p):
     """
-    statement       : open_statement
-                    | closed_statement
+    statement       : assignment
+                    | if_statement
+                    | while_statement
+                    | for_statement
+                    | with_statement
+                    | subprogram_call
+                    | io_statement
+                    | comp_statement
+                    | empty
     """
     pass
 
-def p_open_statement (p):
-    """
-    open_statement  : IF expression THEN non_if_statement
-                    | IF expression THEN open_statement
-                    | IF expression THEN closed_statement ELSE open_statement
-    """
-
-
-def p_closed_statement (p):
-    """
-    closed_statement  : non_if_statement
-                    | IF expression THEN closed_statement ELSE closed_statement
-    """
-
-
-def p_non_if_statement (p):
-    """
-    non_if_statement : assignment
-            | while_statement
-            | for_statement
-            | with_statement
-            | subprogram_call
-            | io_statement
-            | comp_statement
-            | empty
-    """
 
 def p_assignment (p):
     """
     assignment      : variable ASSIGN expression
                     | variable ASSIGN STRING
+    """
+    pass
+
+
+def p_if_statement (p):
+    """
+    if_statement      : IF expression THEN statement if_tail
+    """
+    pass
+
+
+def p_if_tail (p):
+    """
+    if_tail         : ELSE statement
+                    | %prec ELSE
     """
     pass
 
@@ -427,15 +425,13 @@ def p_write_item (p):
 
 def p_error(p):
     if p is None:
-        signal_error("Unexpected end-of-file", 'end')
+        print("Unexpected end-of-file")
     else:
-        signal_error("Unexpected token '{0}'".format(p.value), p.lineno)
+        print("Unexpected token '{}' at line {}".format(p.value, p.lineno))
+        print(f"lexpos: {p.lexpos}, type: {p.type}")
+    error_f = True
 
 parser = yacc.yacc()
-
-def signal_error(string, lineno):
-    print("{1}: {0}".format(string, lineno))
-    error_f = True
 
 
 def from_file(filename):
