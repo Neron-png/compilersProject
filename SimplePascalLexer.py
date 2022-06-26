@@ -94,16 +94,52 @@ def t_NAME(t):
 
 def t_ADDOP(t):
     r'\+|-'
+    return t
 
 
 def t_RELOP(t):
-    r'<|>|(<=)|(>=)|(<>)'
+    r'(<=)|(>=)|(<>)|<|>'
     return t
+
 
 
 def t_BCONST(t):
     r'(TRUE)|(FALSE)'
     t.value = t.value == "TRUE"
+    return t
+
+def t_RCONST_bin(t):
+    r'0B(0|(1(1|0)*))?\.(0|((0|1)*1))'
+    a = int(t.value.split(".")[0][2:], 2)
+    b = int(t.value.split(".")[1], 2)
+    t.value = a + b / 10 ** len(str(b))
+    t.type = "RCONST"
+    return t
+
+
+def t_RCONST_hex(t):
+    r'0H(([A-F1-9][A-F0-9]*)|0)?\.(0|([A-F0-9]*[A-F1-9]))'
+    a = int(t.value.split(".")[0][2:], 16)
+    b = int(t.value.split(".")[1], 16)
+    t.value = a + b / 10 ** len(str(b))
+    t.type = "RCONST"
+    return t
+
+
+def t_RCONST_exp(t):
+    r'\.?([1-9][0-9]*)(E|e)-?([1-9][0-9]*)'
+    t.value = t.value.upper()
+    a = float("0" + t.value.split("E")[0])
+    b = int(t.value.split("E")[1])
+    t.value = a * 10 ** b
+    t.type = "RCONST"
+    return t
+
+
+def t_RCONST_reg(t):
+    r'(([1-9][0-9]*)|0)?\.(([0-9]*[1-9])|0)'
+    t.value = float(t.value)
+    t.type = "RCONST"
     return t
 
 
@@ -127,52 +163,27 @@ def t_ICONST_decim(t):
     t.type = "ICONST"
     return t
 
-
 def t_ICONST_zero(t):
     r'0'
     t.value = 0
     t.type = "ICONST"
     return t
 
+# def t_RCONST_zero(t):
+#     r'0\.0'
+#     t.value = 0.0
+#     t.type = "RCONST"
+#     return t
 
-def t_RCONST_bin(t):
-    r'0B(0|(1(1|0)*))?\.(0|((0|1)*1))'
-    a = int(t.value.split(".")[0][2:], 2)
-    b = int(t.value.split(".")[1], 2)
-    t.value = a + b / 10 ** len(str(b))
-    t.type = "RCONST"
-    return t
-
-
-def t_RCONST_hex(t):
-    r'0H(([A-F1-9][A-F0-9]*)|0)?\.(0|([A-F0-9]*[A-F1-9]))'
-    a = int(t.value.split(".")[0][2:], 16)
-    b = int(t.value.split(".")[1], 16)
-    t.value = a + b / 10 ** len(str(b))
-    t.type = "RCONST"
-    return t
-
-
-def t_RCONST_exp(t):
-    r'\.?([1-9][0-9]*)E-?([1-9][0-9]*)'
-    a = float("0" + t.value.split("E")[0])
-    b = int(t.value.split("E")[1])
-    t.value = a * 10 ** b
-    t.type = "RCONST"
-    return t
-
-
-def t_RCONST_reg(t):
-    r'(([1-9][0-9]*)|0)?\.(([0-9]*[1-9])|0)'
-    t.value = float(t.value)
-    t.type = "RCONST"
-    return t
 
 
 def t_CCONST(t):
     r"'(.|(\\[bvrntf]))'"
     t.value = t.value[1:-1]
     return t
+
+
+
 
 
 # Error handling rule

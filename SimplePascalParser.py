@@ -451,6 +451,7 @@ if __name__ == "__main__" :
     log = logging.getLogger()
     res = parser.parse(f.read(), lexer=SimplePascalLexer.lexer, debug=log)
 
+
     if parser.errorok :
         print("Parsing succeeded")
     else:
