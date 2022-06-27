@@ -5,6 +5,7 @@ import SimplePascalLexer
 from SimplePascalLexer import tokens
 from SimplePascalLexer import lex
 
+
 error_f = False
 
 start = 'program'
@@ -23,27 +24,29 @@ precedence = (
 
 def p_empty(p):
     'empty :'
-    pass
+
+    p[0] = None
 
 def p_program(p):
     """
     program : header declarations subprograms comp_statement DOT
     """
-    pass
+
+    p[0] = ("Program", p[1], p[2], p[3], p[4])
 
 
 def p_header(p):
     """
     header : PROGRAM ID SEMI
     """
-    pass
+    p[0] = ("Header", p[1], p[2], p[3])
 
 
 def p_declarations (p):
     """
     declarations : constdefs typedefs vardefs
     """
-    pass
+    p[0] = ("Declarations", p[1], p[2], p[3])
 
 
 def p_constdefs(p):
@@ -51,7 +54,9 @@ def p_constdefs(p):
     constdefs : CONST constant_defs SEMI
               | empty
     """
-    pass
+    if len(p) == 2:
+        return
+    p[0] = ("Constdefs", p[1], p[2], p[3])
 
 
 def p_constant_defs(p):
@@ -59,7 +64,10 @@ def p_constant_defs(p):
     constant_defs : constant_defs SEMI ID EQU expression
                   |  ID EQU expression
     """
-    pass
+    if len(p) == 4:
+        p[0] = ("Constant_defs", p[1], p[2], p[3])
+        return
+    p[0] = ("Constdefs", p[1], p[3], p[4], p[5])
 
 
 def p_expression(p):
@@ -78,7 +86,26 @@ def p_expression(p):
                 | LPAREN expression RPAREN
                 | setexpression
     """
-    pass
+    if len(p) == 4:
+        if p[1] != "(":
+            # Binop
+            p[0] = (p[2], p[1], p[3])
+        else:
+            # ( EXPRESSION )
+            p[0] = p[2]
+    elif len(p) == 3:
+        if p[1] == "-":
+            p[0] == ("UMINUS", p[2])
+        elif p[1] == "+":
+            p[0] = p[2]
+        else:
+            # NOT
+            p[0] = (p[1], p[2])
+    elif len(p) == 5:
+        # Function call | ['_try_me', '(', None, ')']
+        p[0] = ("funcall", p[1], p[3])
+    else:
+        p[0] = p[1]
 
 
 def p_variable (p):
@@ -87,7 +114,12 @@ def p_variable (p):
                 | variable DOT ID
                 | variable LBRACK expressions RBRACK
     """
-    pass
+    if len(p) == 2:
+        p[0] = ("Variable", p[1])
+    elif len(p) == 4:
+        p[0] = ("Variable", p[1], p[2], p[3])
+    else:
+        p[0] = ("Variable", p[1], p[2], p[3], p[4])
 
 
 def p_expressions (p):
@@ -95,7 +127,10 @@ def p_expressions (p):
     expressions : expressions COMMA expression
                 | expression
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    p[0] = (p[1], p[3])
 
 
 def p_constant (p):
@@ -105,7 +140,7 @@ def p_constant (p):
                 | BCONST
                 | CCONST
     """
-    pass
+    p[0] = p[1]
 
 
 def p_setexpression (p):
@@ -113,7 +148,10 @@ def p_setexpression (p):
     setexpression    : LBRACK elexpressions RBRACK
                     | LBRACK RBRACK
     """
-    pass
+    if len(p) == 3:
+        p[0] = (p[1], p[2])
+        return
+    p[0] = (p[1], p[2], p[3])
 
 
 def p_elexpressions (p):
@@ -121,7 +159,10 @@ def p_elexpressions (p):
     elexpressions   : elexpressions COMMA elexpression
                     | elexpression
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    p[0] = (p[1], p[2], p[3])
 
 
 def p_elexpression (p):
@@ -129,7 +170,10 @@ def p_elexpression (p):
     elexpression    : expression DOTDOT expression
                     | expression
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    p[0] = (p[1], p[2], p[3])
 
 
 def p_typedefs (p):
@@ -137,7 +181,10 @@ def p_typedefs (p):
     typedefs    : TYPE type_defs SEMI
                     | empty
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    p[0] = (p[1], p[2], p[3])
 
 
 def p_type_defs (p):
@@ -145,7 +192,10 @@ def p_type_defs (p):
     type_defs    : type_defs SEMI ID EQU type_def
                 | ID EQU type_def
     """
-    pass
+    if len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
+        return
+    p[0] = (p[1], p[2], p[3], p[4], p[5])
 
 
 def p_type_def (p):
@@ -156,7 +206,11 @@ def p_type_def (p):
                 | LPAREN identifiers RPAREN
                 | limit DOTDOT limit
     """
-    pass
+    if len(p) == 7:
+        p[0] = (p[1], p[2], p[3], p[4], p[5], p[6])
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_dims (p):
@@ -164,7 +218,11 @@ def p_dims (p):
     dims        : dims COMMA limits
                 | limits
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_limits (p):
@@ -172,7 +230,11 @@ def p_limits (p):
     limits      : limit DOTDOT limit
                 | ID
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_limit (p):
@@ -184,7 +246,11 @@ def p_limit (p):
                 | BCONST
                 | ID
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 3:
+        p[0] = (p[1], p[2])
 
 
 def p_typename (p):
@@ -192,7 +258,11 @@ def p_typename (p):
     typename        : standard_type
                     | ID
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 3:
+        p[0] = (p[1], p[2])
 
 
 def p_standard_type (p):
@@ -202,7 +272,8 @@ def p_standard_type (p):
                     | BOOLEAN
                     | CHAR
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
 
 
 def p_fields (p):
@@ -210,14 +281,18 @@ def p_fields (p):
     fields   : fields SEMI field
              | field
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_field (p):
     """
     field   : identifiers COLON typename
     """
-    pass
+    p[0] = (p[1], p[2], p[3])
 
 
 def p_identifiers (p):
@@ -225,7 +300,11 @@ def p_identifiers (p):
     identifiers     : identifiers COMMA ID
                     | ID
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_vardefs (p):
@@ -233,7 +312,11 @@ def p_vardefs (p):
     vardefs     : VAR variable_defs SEMI
                     | empty
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_variable_defs (p):
@@ -241,7 +324,11 @@ def p_variable_defs (p):
     variable_defs     : variable_defs SEMI identifiers COLON typename
                     | identifiers COLON typename
     """
-    pass
+    if len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
+        return
+    else:
+        p[0] = (p[1], p[2], p[3], p[4], p[5])
 
 
 def p_subprograms (p):
@@ -249,7 +336,11 @@ def p_subprograms (p):
     subprograms     : subprograms subprogram SEMI
                     | empty
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_subprogram (p):
@@ -257,7 +348,11 @@ def p_subprogram (p):
     subprogram     : sub_header SEMI FORWARD
                 | sub_header SEMI declarations subprograms comp_statement
     """
-    pass
+    if len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
+        return
+    elif len(p) == 6:
+        p[0] = (p[1], p[2], p[3], p[4], p[5])
 
 
 def p_sub_header (p):
@@ -266,7 +361,11 @@ def p_sub_header (p):
                 | PROCEDURE ID formal_parameters
                 | FUNCTION ID
     """
-    pass
+    if len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3], p[4], p[5])
 
 
 def p_formal_parameters (p):
@@ -274,7 +373,11 @@ def p_formal_parameters (p):
     formal_parameters  : LPAREN parameter_list RPAREN
                 | empty
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_parameter_list (p):
@@ -282,7 +385,11 @@ def p_parameter_list (p):
     parameter_list  : parameter_list SEMI pass_p identifiers COLON typename
                 | pass_p identifiers COLON typename
     """
-    pass
+    if len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
+        return
+    elif len(p) == 7:
+        p[0] = (p[1], p[2], p[3], p[4], p[5], p[6])
 
 
 def p_pass_p (p):
@@ -290,14 +397,18 @@ def p_pass_p (p):
     pass_p      : VAR
                 | empty
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
 
 
 def p_comp_statement (p):
     """
     comp_statement      : BEGIN statements END
     """
-    pass
+    if len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
+        return
 
 
 def p_statements (p):
@@ -305,7 +416,11 @@ def p_statements (p):
     statements      : statements SEMI statement
                     | statement
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_statement (p):
@@ -320,7 +435,9 @@ def p_statement (p):
                     | comp_statement
                     | empty
     """
-    pass
+    if len(p) == 1:
+        return
+    p[0] = p[1]
 
 
 def p_assignment (p):
@@ -328,14 +445,14 @@ def p_assignment (p):
     assignment      : variable ASSIGN expression
                     | variable ASSIGN STRING
     """
-    pass
+    p[0] = ("ASSIGN", p[1], p[3])
 
 
 def p_if_statement (p):
     """
     if_statement      : IF expression THEN statement if_tail
     """
-    pass
+    p[0] = ("IF", p[2], p[4], p[5])
 
 
 def p_if_tail (p):
@@ -343,21 +460,22 @@ def p_if_tail (p):
     if_tail         : ELSE statement
                     | %prec ELSE
     """
-    pass
+    if len(p) == 3:
+        p[0] = (p[2])
 
 
 def p_while_statement (p):
     """
     while_statement         : WHILE expression DO statement
     """
-    pass
+    p[0] = ("WHILE", p[2], p[4])
 
 
 def p_for_statement (p):
     """
     for_statement         : FOR ID ASSIGN iter_space DO statement
     """
-    pass
+    p[0] = ("FOR", p[2], p[4], p[6])
 
 
 def p_iter_space (p):
@@ -365,14 +483,14 @@ def p_iter_space (p):
     iter_space          : expression TO expression
                         | expression DOWNTO expression
     """
-    pass
+    p[0] = (p[2], p[1], p[3])
 
 
 def p_with_statement (p):
     """
     with_statement      : WITH variable DO statement
     """
-    pass
+    p[0] = (p[1], p[2], p[3], p[4])
 
 
 def p_subprogram_call (p):
@@ -380,7 +498,11 @@ def p_subprogram_call (p):
     subprogram_call     : ID
                         | ID LPAREN expressions RPAREN
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 5:
+        p[0] = (p[1], p[2], p[3], p[4])
 
 
 def p_io_statement (p):
@@ -388,7 +510,7 @@ def p_io_statement (p):
     io_statement        : READ LPAREN read_list RPAREN
                         | WRITE LPAREN write_list RPAREN
     """
-    pass
+    p[0] = (p[1], p[2], p[3], p[4])
 
 
 def p_read_list (p):
@@ -396,14 +518,18 @@ def p_read_list (p):
     read_list           : read_list COMMA read_item
                         | read_item
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_read_item (p):
     """
     read_item           : variable
     """
-    pass
+    p[0] = ("READ", p[1])
 
 
 def p_write_list (p):
@@ -411,15 +537,25 @@ def p_write_list (p):
     write_list          : write_list COMMA write_item
                         | write_item
     """
-    pass
+    if len(p) == 2:
+        p[0] = p[1]
+        return
+    elif len(p) == 4:
+        p[0] = (p[1], p[2], p[3])
 
 
 def p_write_item (p):
     """
     write_item          : expression
-                        | STRING
+                        | string
     """
-    pass
+    p[0] = ("WRITE", p[1])
+
+def p_string (p):
+    """
+    string :     STRING
+    """
+    p[0] = ("STRING", p[1])
 
 #########################################################################
 
@@ -451,6 +587,7 @@ if __name__ == "__main__" :
     log = logging.getLogger()
     res = parser.parse(f.read(), lexer=SimplePascalLexer.lexer, debug=log)
 
+    print(res)
 
     if parser.errorok :
         print("Parsing succeeded")
