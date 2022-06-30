@@ -39,7 +39,7 @@ def p_header(p):
     """
     header : PROGRAM ID SEMI
     """
-    p[0] = ("Header", p[1], p[2], p[3])
+    p[0] = ("Header", p[1], p[2])
 
 
 def p_declarations (p):
@@ -56,7 +56,7 @@ def p_constdefs(p):
     """
     if len(p) == 2:
         return
-    p[0] = ("Constdefs", p[1], p[2], p[3])
+    p[0] = ("Constdefs", p[1], p[2])
 
 
 def p_constant_defs(p):
@@ -102,8 +102,8 @@ def p_expression(p):
             # NOT
             p[0] = (p[1], p[2])
     elif len(p) == 5:
-        # Function call | ['_try_me', '(', None, ')']
-        p[0] = ("funcall", p[1], p[3])
+        # Function def | ['_try_me', '(', None, ')']
+        p[0] = ("fundef", p[1], p[3])
     else:
         p[0] = p[1]
 
@@ -184,7 +184,7 @@ def p_typedefs (p):
     if len(p) == 2:
         p[0] = p[1]
         return
-    p[0] = (p[1], p[2], p[3])
+    p[0] = (p[1], p[2])
 
 
 def p_type_defs (p):
@@ -195,7 +195,7 @@ def p_type_defs (p):
     if len(p) == 4:
         p[0] = (p[1], p[2], p[3])
         return
-    p[0] = (p[1], p[2], p[3], p[4], p[5])
+    p[0] = (p[1], p[3], p[4], p[5])
 
 
 def p_type_def (p):
@@ -285,7 +285,7 @@ def p_fields (p):
         p[0] = p[1]
         return
     elif len(p) == 4:
-        p[0] = (p[1], p[2], p[3])
+        p[0] = (p[1], p[3])
 
 
 def p_field (p):
@@ -316,7 +316,7 @@ def p_vardefs (p):
         p[0] = p[1]
         return
     elif len(p) == 4:
-        p[0] = (p[1], p[2], p[3])
+        p[0] = (p[1], p[2])
 
 
 def p_variable_defs (p):
@@ -328,7 +328,7 @@ def p_variable_defs (p):
         p[0] = (p[1], p[2], p[3])
         return
     else:
-        p[0] = (p[1], p[2], p[3], p[4], p[5])
+        p[0] = (p[1], p[3], p[4], p[5])
 
 
 def p_subprograms (p):
@@ -340,7 +340,7 @@ def p_subprograms (p):
         p[0] = p[1]
         return
     elif len(p) == 4:
-        p[0] = (p[1], p[2], p[3])
+        p[0] = (p[1], p[2])
 
 
 def p_subprogram (p):
@@ -349,10 +349,10 @@ def p_subprogram (p):
                 | sub_header SEMI declarations subprograms comp_statement
     """
     if len(p) == 4:
-        p[0] = (p[1], p[2], p[3])
+        p[0] = (p[1], p[3])
         return
     elif len(p) == 6:
-        p[0] = (p[1], p[2], p[3], p[4], p[5])
+        p[0] = (p[1], p[3], p[4], p[5])
 
 
 def p_sub_header (p):
@@ -362,10 +362,12 @@ def p_sub_header (p):
                 | FUNCTION ID
     """
     if len(p) == 4:
-        p[0] = (p[1], p[2], p[3])
+        p[0] = ("procdef" , p[2], p[3])
         return
-    elif len(p) == 4:
-        p[0] = (p[1], p[2], p[3], p[4], p[5])
+    elif len(p) == 6:
+        p[0] = ("funcdef" , p[2], p[3], p[4], p[5])
+    else:
+        p[0] = ("funcdef", p[2])
 
 
 def p_formal_parameters (p):
@@ -389,7 +391,7 @@ def p_parameter_list (p):
         p[0] = (p[1], p[2], p[3])
         return
     elif len(p) == 7:
-        p[0] = (p[1], p[2], p[3], p[4], p[5], p[6])
+        p[0] = (p[1], p[3], p[4], p[6])
 
 
 def p_pass_p (p):
@@ -420,7 +422,7 @@ def p_statements (p):
         p[0] = p[1]
         return
     elif len(p) == 4:
-        p[0] = (p[1], p[2], p[3])
+        p[0] = (p[1], p[3])
 
 
 def p_statement (p):
@@ -570,24 +572,14 @@ def p_error(p):
 parser = yacc.yacc()
 
 
-def from_file(filename):
-    try:
-        with open(filename, "rU") as f:
-            parser.parse(f.read(), lexer=lex.lex(module=SimplePascalLexer), debug=None)
-        return not error_f
-    except IOError as e:
-        print("I/O error: %s: %s" % (filename, e.strerror))
 
 
 if __name__ == "__main__" :
     f = open("SimplePascaltest1.p", "r")
-    logging.basicConfig(
-            level=logging.CRITICAL,
-    )
-    log = logging.getLogger()
-    res = parser.parse(f.read(), lexer=SimplePascalLexer.lexer, debug=log)
 
-    print(res)
+    result = parser.parse(f.read(), lexer=SimplePascalLexer.lexer)
+
+    print(result)
 
     if parser.errorok :
         print("Parsing succeeded")

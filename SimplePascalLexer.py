@@ -184,14 +184,9 @@ def t_CCONST(t):
 
 
 
-
-
-# Error handling rule
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     print(lexer.lineno)
-    # t.lexer.skip(1)
-
 lexer = lex()
 
 if __name__ == "__main__":
